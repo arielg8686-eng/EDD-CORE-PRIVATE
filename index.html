@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDD CORE | OMEGA-FLOW SUITE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #020617; color: #e2e8f0; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .crt { background: linear-gradient(rgba(18, 16, 16, 0.1) 50%, rgba(0, 0, 0, 0.25) 50%); background-size: 100% 4px; }
+        .panel { background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; }
+        .status-danger { border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
+        .status-safe { border-color: #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); }
+    </style>
+</head>
+<body class="h-screen w-screen p-4 crt flex flex-col gap-4">
+    <header class="flex justify-between items-center px-4 border-b border-slate-700 pb-2">
+        <h1 class="text-xs text-blue-400 uppercase tracking-widest font-bold">EDD CORE // OMEGA-FLOW SUITE</h1>
+        <div id="core-status" class="px-3 py-1 border border-slate-600 text-[10px] font-mono">ESTADO: INICIALIZADO</div>
+    </header>
+
+    <div class="grid grid-cols-4 gap-4 flex-1">
+        <div class="col-span-1 panel p-4 flex flex-col gap-3">
+            <h2 class="text-[10px] uppercase font-bold text-slate-400">Kernel L11</h2>
+            <input id="cmd-input" type="text" placeholder="COMANDO..." class="bg-black border border-slate-700 p-2 text-[10px] text-white w-full">
+            <button id="btn-execute" class="bg-blue-900/50 hover:bg-blue-600 p-2 text-[10px] uppercase border border-blue-700 transition">Ejecutar Comando</button>
+            <div id="l11-monitor" class="text-[9px] font-mono mt-auto border border-slate-700 p-2 bg-black">
+                POLÍTICAS ACTIVAS: 14<br>ESTADO: PROTEGIDO
+            </div>
+        </div>
+
+        <div class="col-span-2 panel p-4 flex flex-col">
+            <h2 class="text-[10px] uppercase font-bold text-slate-400 mb-2">Núcleo Fractal (Omega-Core)</h2>
+            <canvas id="fractal-canvas" class="w-full flex-1 bg-black rounded border border-slate-800"></canvas>
+        </div>
+
+        <div class="col-span-1 panel p-4 flex flex-col">
+            <h2 class="text-[10px] uppercase font-bold text-slate-400 mb-2">Auditoría en Tiempo Real</h2>
+            <div id="audit-log" class="text-[9px] flex-1 overflow-y-auto space-y-1 font-mono"></div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('fractal-canvas');
+        const ctx = canvas.getContext('2d');
+        const auditLog = document.getElementById('audit-log');
+        const forbidden = ['DROP', 'DELETE', 'TRUNCATE', 'ALTER'];
+
+        function log(msg, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = type === 'alert' ? 'text-red-500' : 'text-green-500';
+            div.textContent = `[${time}] ${msg}`;
+            auditLog.prepend(div);
+        }
+
+        function animateFractal() {
+            ctx.fillStyle = 'rgba(0,0,0,0.05)';
+            ctx.fillRect(0,0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#3b82f6';
+            ctx.beginPath();
+            ctx.arc(canvas.width/2, canvas.height/2, 50 + Math.sin(Date.now()/500)*20, 0, Math.PI*2);
+            ctx.stroke();
+            requestAnimationFrame(animateFractal);
+        }
+        animateFractal();
+
+        document.getElementById('btn-execute').onclick = () => {
+            const cmd = document.getElementById('cmd-input').value.toUpperCase();
+            if(!cmd) return;
+            
+            if(forbidden.some(f => cmd.includes(f))) {
+                document.body.className = "h-screen w-screen p-4 crt flex flex-col gap-4 status-danger";
+                log(`VIOLACIÓN L11: ${cmd} BLOQUEADO`, 'alert');
+            } else {
+                document.body.className = "h-screen w-screen p-4 crt flex flex-col gap-4 status-safe";
+                log(`EXEC: ${cmd} :: SUCCESS`);
+            }
+            document.getElementById('cmd-input').value = '';
+        };
+    </script>
+</body>
+</html>
